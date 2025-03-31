@@ -13,9 +13,9 @@ import {
 import { RateLimiter, ConnectionMonitor, validateMessageSize } from "./utils/security.js";
 import { Tool } from "./types.js";
 import { z } from "zod";
-import path from "path";
-import os from 'os';
-import fs from 'fs';
+import path from "node:path";
+import os from 'node:os';
+import fs from 'node:fs';
 import {
   listVaultResources,
   readVaultResource

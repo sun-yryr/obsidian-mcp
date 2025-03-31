@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { FileOperationResult } from "../../types.js";
-import { promises as fs } from "fs";
-import path from "path";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { ensureMarkdownExtension, validateVaultPath } from "../../utils/path.js";
 import { fileExists } from "../../utils/files.js";

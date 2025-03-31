@@ -13,9 +13,9 @@ import { createRenameTagTool } from "./tools/rename-tag/index.js";
 import { createReadNoteTool } from "./tools/read-note/index.js";
 import { listVaultsPrompt } from "./prompts/list-vaults/index.js";
 import { registerPrompt } from "./utils/prompt-factory.js";
-import path from "path";
-import os from "os";
-import { promises as fs, constants as fsConstants } from "fs";
+import path from "node:path";
+import os from "node:os";
+import { promises as fs, constants as fsConstants } from "node:fs";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { 
   checkPathCharacters, 

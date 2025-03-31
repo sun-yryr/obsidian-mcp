@@ -1,4 +1,4 @@
-import { promises as fs, Dirent } from "fs";
+import { promises as fs, Dirent } from "node:fs";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { normalizePath, safeJoinPath } from "./path.js";
 

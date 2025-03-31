@@ -1,9 +1,9 @@
-import path from "path";
-import fs from "fs/promises";
+import path from "node:path";
+import fs from "node:fs/promises";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import os from "os";
-import { exec as execCallback } from "child_process";
-import { promisify } from "util";
+import os from "node:os";
+import { exec as execCallback } from "node:child_process";
+import { promisify } from "node:util";
 
 // Promisify exec for cleaner async/await usage
 const exec = promisify(execCallback);

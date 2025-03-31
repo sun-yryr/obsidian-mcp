@@ -32,10 +32,8 @@
     "@types/bun": "latest"
   },
   "scripts": {
-    "build": "bun build ./src/main.ts --outdir build --target node && chmod +x build/main.js",
-    "start": "bun build/main.js",
-    "prepublishOnly": "npm run build",
-    "inspect": "bunx @modelcontextprotocol/inspector bun ./build/main.js"
+    "start": "deno run --unstable-sloppy-imports -S=\"homedir,uid\" -N=localhost -R -W src/main.ts",
+    "compile": "deno compile --unstable-sloppy-imports -S=\"homedir,uid\" -N=localhost -R -W --output obsidian_mcp src/main.ts",
   },
   "keywords": [
     "obsidian",

@@ -1,4 +1,5 @@
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { setInterval, clearInterval } from "node:timers";
 
 // Basic rate limiting for API protection
 export class RateLimiter {

@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { promises as fs } from "fs";
+import { promises as fs } from "node:fs";
 
 export interface VaultResource {
   uri: string;

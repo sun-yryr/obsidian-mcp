@@ -3,11 +3,14 @@ import { FileOperationResult } from "../../types.ts";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ensureMarkdownExtension, validateVaultPath } from "../../utils/path.ts";
+import {
+  ensureMarkdownExtension,
+  validateVaultPath,
+} from "../../utils/path.ts";
 import { fileExists } from "../../utils/files.ts";
 import { createNoteNotFoundError, handleFsError } from "../../utils/errors.ts";
 import { createToolResponse, formatFileResult } from "../../utils/responses.ts";
-import { createTool } from "../../utils/tool-factory.ts"
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({
@@ -16,14 +19,20 @@ const schema = z.object({
     .describe("Name of the vault containing the note"),
   filename: z.string()
     .min(1, "Filename cannot be empty")
-    .refine(name => !name.includes('/') && !name.includes('\\'), 
-      "Filename cannot contain path separators - use the 'folder' parameter for paths instead")
-    .describe("Just the note name without any path separators (e.g. 'my-note.md', NOT 'folder/my-note.md')"),
+    .refine(
+      (name) => !name.includes("/") && !name.includes("\\"),
+      "Filename cannot contain path separators - use the 'folder' parameter for paths instead",
+    )
+    .describe(
+      "Just the note name without any path separators (e.g. 'my-note.md', NOT 'folder/my-note.md')",
+    ),
   folder: z.string()
     .optional()
-    .refine(folder => !folder || !path.isAbsolute(folder), 
-      "Folder must be a relative path")
-    .describe("Optional subfolder path relative to vault root")
+    .refine(
+      (folder) => !folder || !path.isAbsolute(folder),
+      "Folder must be a relative path",
+    )
+    .describe("Optional subfolder path relative to vault root"),
 }).strict();
 
 type ReadNoteInput = z.infer<typeof schema>;
@@ -31,13 +40,13 @@ type ReadNoteInput = z.infer<typeof schema>;
 async function readNote(
   vaultPath: string,
   filename: string,
-  folder?: string
+  folder?: string,
 ): Promise<FileOperationResult & { content: string }> {
   const sanitizedFilename = ensureMarkdownExtension(filename);
   const fullPath = folder
     ? path.join(vaultPath, folder, sanitizedFilename)
     : path.join(vaultPath, sanitizedFilename);
-  
+
   // Validate path is within vault
   validateVaultPath(vaultPath, fullPath);
 
@@ -54,14 +63,14 @@ async function readNote(
       success: true,
       message: "Note read successfully",
       path: fullPath,
-      operation: 'edit', // Using 'edit' since we don't have a 'read' operation type
-      content: content
+      operation: "edit", // Using 'edit' since we don't have a 'read' operation type
+      content: content,
     };
   } catch (error: unknown) {
     if (error instanceof McpError) {
       throw error;
     }
-    throw handleFsError(error, 'read note');
+    throw handleFsError(error, "read note");
   }
 }
 
@@ -77,17 +86,17 @@ Examples:
     schema,
     handler: async (args, vaultPath, _vaultName) => {
       const result = await readNote(vaultPath, args.filename, args.folder);
-      
+
       const formattedResult = formatFileResult({
         success: result.success,
         message: result.message,
         path: result.path,
-        operation: result.operation
+        operation: result.operation,
       });
-      
+
       return createToolResponse(
-        `${result.content}\n\n${formattedResult}`
+        `${result.content}\n\n${formattedResult}`,
       );
-    }
+    },
   }, vaults);
 }

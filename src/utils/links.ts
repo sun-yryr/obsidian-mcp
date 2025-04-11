@@ -23,58 +23,58 @@ export async function updateLinksInFile({
   isMovedToOtherVault,
   isMovedFromOtherVault,
   sourceVaultName,
-  destVaultName
+  destVaultName,
 }: LinkUpdateOptions): Promise<boolean> {
   const content = await fs.readFile(filePath, "utf-8");
-  
+
   const oldName = path.basename(oldPath, ".md");
   const newName = newPath ? path.basename(newPath, ".md") : null;
-  
+
   let newContent: string;
-  
+
   if (isMovedToOtherVault) {
     // Handle move to another vault - add vault reference
     newContent = content
       .replace(
         new RegExp(`\\[\\[${oldName}(\\|[^\\]]*)?\\]\\]`, "g"),
-        `[[${destVaultName}/${oldName}$1]]`
+        `[[${destVaultName}/${oldName}$1]]`,
       )
       .replace(
         new RegExp(`\\[([^\\]]*)\\]\\(${oldName}\\.md\\)`, "g"),
-        `[$1](${destVaultName}/${oldName}.md)`
+        `[$1](${destVaultName}/${oldName}.md)`,
       );
   } else if (isMovedFromOtherVault) {
     // Handle move from another vault - add note about original location
     newContent = content
       .replace(
         new RegExp(`\\[\\[${oldName}(\\|[^\\]]*)?\\]\\]`, "g"),
-        `[[${newName}$1]] *(moved from ${sourceVaultName})*`
+        `[[${newName}$1]] *(moved from ${sourceVaultName})*`,
       )
       .replace(
         new RegExp(`\\[([^\\]]*)\\]\\(${oldName}\\.md\\)`, "g"),
-        `[$1](${newName}.md) *(moved from ${sourceVaultName})*`
+        `[$1](${newName}.md) *(moved from ${sourceVaultName})*`,
       );
   } else if (!newPath) {
     // Handle deletion - strike through the links
     newContent = content
       .replace(
         new RegExp(`\\[\\[${oldName}(\\|[^\\]]*)?\\]\\]`, "g"),
-        `~~[[${oldName}$1]]~~`
+        `~~[[${oldName}$1]]~~`,
       )
       .replace(
         new RegExp(`\\[([^\\]]*)\\]\\(${oldName}\\.md\\)`, "g"),
-        `~~[$1](${oldName}.md)~~`
+        `~~[$1](${oldName}.md)~~`,
       );
   } else {
     // Handle move/rename within same vault
     newContent = content
       .replace(
         new RegExp(`\\[\\[${oldName}(\\|[^\\]]*)?\\]\\]`, "g"),
-        `[[${newName}$1]]`
+        `[[${newName}$1]]`,
       )
       .replace(
         new RegExp(`\\[([^\\]]*)\\]\\(${oldName}\\.md\\)`, "g"),
-        `[$1](${newName}.md)`
+        `[$1](${newName}.md)`,
       );
   }
 
@@ -82,7 +82,7 @@ export async function updateLinksInFile({
     await fs.writeFile(filePath, newContent, "utf-8");
     return true;
   }
-  
+
   return false;
 }
 
@@ -95,28 +95,34 @@ export async function updateVaultLinks(
   oldPath: string | null | undefined,
   newPath: string | null | undefined,
   sourceVaultName?: string,
-  destVaultName?: string
+  destVaultName?: string,
 ): Promise<number> {
   const files = await getAllMarkdownFiles(vaultPath);
   let updatedFiles = 0;
 
   // Determine the type of operation
-  const isMovedToOtherVault: boolean = Boolean(oldPath !== null && newPath === null && sourceVaultName && destVaultName);
-  const isMovedFromOtherVault: boolean = Boolean(oldPath === null && newPath !== null && sourceVaultName && destVaultName);
+  const isMovedToOtherVault: boolean = Boolean(
+    oldPath !== null && newPath === null && sourceVaultName && destVaultName,
+  );
+  const isMovedFromOtherVault: boolean = Boolean(
+    oldPath === null && newPath !== null && sourceVaultName && destVaultName,
+  );
 
   for (const file of files) {
     // Skip the target file itself if it's a move operation
     if (newPath && file === path.join(vaultPath, newPath)) continue;
-    
-    if (await updateLinksInFile({
-      filePath: file,
-      oldPath: oldPath || "",
-      newPath: newPath || undefined,
-      isMovedToOtherVault,
-      isMovedFromOtherVault,
-      sourceVaultName,
-      destVaultName
-    })) {
+
+    if (
+      await updateLinksInFile({
+        filePath: file,
+        oldPath: oldPath || "",
+        newPath: newPath || undefined,
+        isMovedToOtherVault,
+        isMovedFromOtherVault,
+        sourceVaultName,
+        destVaultName,
+      })
+    ) {
       updatedFiles++;
     }
   }

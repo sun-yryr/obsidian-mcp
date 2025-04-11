@@ -1,5 +1,5 @@
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { setInterval, clearInterval } from "node:timers";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import { clearInterval, setInterval } from "node:timers";
 
 // Basic rate limiting for API protection
 export class RateLimiter {
@@ -15,10 +15,12 @@ export class RateLimiter {
   checkLimit(clientId: string): boolean {
     const now = Date.now();
     const timestamps = this.requests.get(clientId) || [];
-    
+
     // Remove old timestamps
-    const validTimestamps = timestamps.filter(time => now - time < this.timeWindow);
-    
+    const validTimestamps = timestamps.filter((time) =>
+      now - time < this.timeWindow
+    );
+
     if (validTimestamps.length >= this.maxRequests) {
       return false;
     }
@@ -37,7 +39,7 @@ export function validateMessageSize(message: any): void {
   if (size > MAX_MESSAGE_SIZE) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Message size exceeds limit of ${MAX_MESSAGE_SIZE} bytes`
+      `Message size exceeds limit of ${MAX_MESSAGE_SIZE} bytes`,
     );
   }
 }

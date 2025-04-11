@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Converts a JSON Schema object to a Zod schema
@@ -12,28 +12,28 @@ function jsonSchemaToZod(schema: {
 }): z.ZodSchema {
   const requiredFields = new Set(schema.required || []);
   const properties: Record<string, z.ZodTypeAny> = {};
-  
+
   for (const [key, value] of Object.entries(schema.properties)) {
     let fieldSchema: z.ZodTypeAny;
-    
+
     switch (value.type) {
-      case 'string':
+      case "string":
         fieldSchema = value.enum ? z.enum(value.enum) : z.string();
         break;
-      case 'number':
+      case "number":
         fieldSchema = z.number();
         break;
-      case 'boolean':
+      case "boolean":
         fieldSchema = z.boolean();
         break;
-      case 'array':
-        if (value.items.type === 'string') {
+      case "array":
+        if (value.items.type === "string") {
           fieldSchema = z.array(z.string());
         } else {
           fieldSchema = z.array(z.unknown());
         }
         break;
-      case 'object':
+      case "object":
         if (value.properties) {
           fieldSchema = jsonSchemaToZod(value);
         } else {
@@ -50,9 +50,11 @@ function jsonSchemaToZod(schema: {
     }
 
     // Make field optional if it's not required
-    properties[key] = requiredFields.has(key) ? fieldSchema : fieldSchema.optional();
+    properties[key] = requiredFields.has(key)
+      ? fieldSchema
+      : fieldSchema.optional();
   }
-  
+
   return z.object(properties);
 }
 
@@ -83,10 +85,10 @@ export function createSchemaHandler<T>(schema: z.ZodSchema<T>) {
       return {
         type: fullSchema.type || "object",
         properties: fullSchema.properties || {},
-        required: fullSchema.required || []
+        required: fullSchema.required || [],
       };
     })(),
-    
+
     // Validate and parse input
     parse: (input: unknown): T => {
       try {
@@ -95,11 +97,13 @@ export function createSchemaHandler<T>(schema: z.ZodSchema<T>) {
         if (error instanceof z.ZodError) {
           throw new McpError(
             ErrorCode.InvalidParams,
-            `Invalid arguments: ${error.errors.map(e => e.message).join(", ")}`
+            `Invalid arguments: ${
+              error.errors.map((e) => e.message).join(", ")
+            }`,
           );
         }
         throw error;
       }
-    }
+    },
   };
 }

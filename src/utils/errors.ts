@@ -1,4 +1,4 @@
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 
 /**
@@ -11,39 +11,39 @@ export function handleFsError(error: unknown, operation: string): never {
 
   if (error instanceof Error) {
     const nodeError = error as NodeJS.ErrnoException;
-    
+
     switch (nodeError.code) {
-      case 'ENOENT':
+      case "ENOENT":
         throw new McpError(
           ErrorCode.InvalidRequest,
-          `File or directory not found: ${nodeError.message}`
+          `File or directory not found: ${nodeError.message}`,
         );
-      case 'EACCES':
+      case "EACCES":
         throw new McpError(
           ErrorCode.InvalidRequest,
-          `Permission denied: ${nodeError.message}`
+          `Permission denied: ${nodeError.message}`,
         );
-      case 'EEXIST':
+      case "EEXIST":
         throw new McpError(
           ErrorCode.InvalidRequest,
-          `File or directory already exists: ${nodeError.message}`
+          `File or directory already exists: ${nodeError.message}`,
         );
-      case 'ENOSPC':
+      case "ENOSPC":
         throw new McpError(
           ErrorCode.InternalError,
-          'Not enough space to write file'
+          "Not enough space to write file",
         );
       default:
         throw new McpError(
           ErrorCode.InternalError,
-          `Failed to ${operation}: ${nodeError.message}`
+          `Failed to ${operation}: ${nodeError.message}`,
         );
     }
   }
 
   throw new McpError(
     ErrorCode.InternalError,
-    `Unexpected error during ${operation}`
+    `Unexpected error during ${operation}`,
   );
 }
 
@@ -53,7 +53,7 @@ export function handleFsError(error: unknown, operation: string): never {
 export function handleZodError(error: z.ZodError): never {
   throw new McpError(
     ErrorCode.InvalidRequest,
-    `Invalid arguments: ${error.errors.map(e => e.message).join(", ")}`
+    `Invalid arguments: ${error.errors.map((e) => e.message).join(", ")}`,
   );
 }
 
@@ -64,8 +64,8 @@ export function createNoteExistsError(path: string): McpError {
   return new McpError(
     ErrorCode.InvalidRequest,
     `A note already exists at: ${path}\n\n` +
-    'To prevent accidental modifications, this operation has been cancelled.\n' +
-    'If you want to modify an existing note, please explicitly request to edit or replace it.'
+      "To prevent accidental modifications, this operation has been cancelled.\n" +
+      "If you want to modify an existing note, please explicitly request to edit or replace it.",
   );
 }
 
@@ -75,6 +75,6 @@ export function createNoteExistsError(path: string): McpError {
 export function createNoteNotFoundError(path: string): McpError {
   return new McpError(
     ErrorCode.InvalidRequest,
-    `Note "${path}" not found in vault`
+    `Note "${path}" not found in vault`,
   );
 }

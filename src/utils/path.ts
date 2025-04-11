@@ -1,6 +1,6 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import os from "node:os";
 import { exec as execCallback } from "node:child_process";
 import { promisify } from "node:util";
@@ -15,47 +15,47 @@ const exec = promisify(execCallback);
  */
 export function checkPathCharacters(vaultPath: string): string | null {
   // Platform-specific path length limits
-  const maxPathLength = process.platform === 'win32' ? 260 : 4096;
+  const maxPathLength = process.platform === "win32" ? 260 : 4096;
   if (vaultPath.length > maxPathLength) {
     return `Path exceeds maximum length (${maxPathLength} characters)`;
   }
 
   // Check component length (individual parts between separators)
   const components = vaultPath.split(/[\/\\]/);
-  const maxComponentLength = process.platform === 'win32' ? 255 : 255;
-  const longComponent = components.find(c => c.length > maxComponentLength);
+  const maxComponentLength = process.platform === "win32" ? 255 : 255;
+  const longComponent = components.find((c) => c.length > maxComponentLength);
   if (longComponent) {
     return `Directory/file name too long: "${longComponent.slice(0, 50)}..."`;
   }
 
   // Check for root-only paths
-  if (process.platform === 'win32') {
+  if (process.platform === "win32") {
     if (/^[A-Za-z]:\\?$/.test(vaultPath)) {
-      return 'Cannot use drive root directory';
+      return "Cannot use drive root directory";
     }
   } else {
-    if (vaultPath === '/') {
-      return 'Cannot use filesystem root directory';
+    if (vaultPath === "/") {
+      return "Cannot use filesystem root directory";
     }
   }
 
   // Check for relative path components
-  if (components.includes('..') || components.includes('.')) {
-    return 'Path cannot contain relative components (. or ..)';
+  if (components.includes("..") || components.includes(".")) {
+    return "Path cannot contain relative components (. or ..)";
   }
 
   // Check for non-printable characters
   if (/[\x00-\x1F\x7F]/.test(vaultPath)) {
-    return 'Contains non-printable characters';
+    return "Contains non-printable characters";
   }
 
   // Platform-specific checks
-  if (process.platform === 'win32') {
+  if (process.platform === "win32") {
     // Windows-specific checks
     const winReservedNames = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
     const pathParts = vaultPath.split(/[\/\\]/);
-    if (pathParts.some(part => winReservedNames.test(part))) {
-      return 'Contains Windows reserved names (CON, PRN, etc.)';
+    if (pathParts.some((part) => winReservedNames.test(part))) {
+      return "Contains Windows reserved names (CON, PRN, etc.)";
     }
 
     // Windows invalid characters (allowing : for drive letters)
@@ -81,32 +81,32 @@ export function checkPathCharacters(vaultPath: string): string | null {
 
     // Windows device paths
     if (/^\\\\.\\/.test(vaultPath)) {
-      return 'Device paths are not allowed';
+      return "Device paths are not allowed";
     }
   } else {
     // Unix-specific checks
-    const unixInvalidChars = /[\x00]/;  // Only check for null character
-    const pathComponents = vaultPath.split('/');
+    const unixInvalidChars = /[\x00]/; // Only check for null character
+    const pathComponents = vaultPath.split("/");
     for (const component of pathComponents) {
       if (unixInvalidChars.test(component)) {
-        return 'Contains invalid characters for Unix paths';
+        return "Contains invalid characters for Unix paths";
       }
     }
   }
 
   // Check for Unicode replacement character
-  if (vaultPath.includes('\uFFFD')) {
-    return 'Contains invalid Unicode characters';
+  if (vaultPath.includes("\uFFFD")) {
+    return "Contains invalid Unicode characters";
   }
 
   // Check for leading/trailing whitespace
   if (vaultPath !== vaultPath.trim()) {
-    return 'Contains leading or trailing whitespace';
+    return "Contains leading or trailing whitespace";
   }
 
   // Check for consecutive separators
   if (/[\/\\]{2,}/.test(vaultPath)) {
-    return 'Contains consecutive path separators';
+    return "Contains consecutive path separators";
   }
 
   return null;
@@ -117,35 +117,42 @@ export function checkPathCharacters(vaultPath: string): string | null {
  * @param vaultPath - The path to check
  * @returns Error message if invalid, null if valid
  */
-export async function checkLocalPath(vaultPath: string): Promise<string | null> {
+export async function checkLocalPath(
+  vaultPath: string,
+): Promise<string | null> {
   try {
     // Get real path (resolves symlinks)
     const realPath = await fs.realpath(vaultPath);
-    
+
     // Check if path changed significantly after resolving symlinks
     if (path.dirname(realPath) !== path.dirname(vaultPath)) {
-      return 'Path contains symlinks that point outside the parent directory';
+      return "Path contains symlinks that point outside the parent directory";
     }
 
     // Check for network paths
-    if (process.platform === 'win32') {
+    if (process.platform === "win32") {
       // Windows UNC paths and mapped drives
-      if (realPath.startsWith('\\\\') || /^[a-zA-Z]:\\$/.test(realPath.slice(0, 3))) {
+      if (
+        realPath.startsWith("\\\\") ||
+        /^[a-zA-Z]:\\$/.test(realPath.slice(0, 3))
+      ) {
         // Check Windows drive type
         const drive = realPath[0].toUpperCase();
-        
+
         // Helper functions for drive type checking
         async function checkWithWmic() {
-          const cmd = `wmic logicaldisk where "DeviceID='${drive}:'" get DriveType /value`;
+          const cmd =
+            `wmic logicaldisk where "DeviceID='${drive}:'" get DriveType /value`;
           return await exec(cmd, { timeout: 5000 });
         }
 
         async function checkWithPowershell() {
-          const cmd = `powershell -Command "(Get-WmiObject -Class Win32_LogicalDisk | Where-Object { $_.DeviceID -eq '${drive}:' }).DriveType"`;
+          const cmd =
+            `powershell -Command "(Get-WmiObject -Class Win32_LogicalDisk | Where-Object { $_.DeviceID -eq '${drive}:' }).DriveType"`;
           const { stdout, stderr } = await exec(cmd, { timeout: 5000 });
           return { stdout: `DriveType=${stdout.trim()}`, stderr };
         }
-        
+
         try {
           let result: { stdout: string; stderr: string };
           try {
@@ -163,34 +170,34 @@ export async function checkLocalPath(vaultPath: string): Promise<string | null> 
 
           // DriveType: 2 = Removable, 3 = Local, 4 = Network, 5 = CD-ROM, 6 = RAM disk
           const match = stdout.match(/DriveType=(\d+)/);
-          const driveType = match ? match[1] : '0';
-          
+          const driveType = match ? match[1] : "0";
+
           // Consider removable drives and unknown types as potentially network-based
-          if (driveType === '0' || driveType === '2' || driveType === '4') {
-            return 'Network, removable, or unknown drive type is not supported';
+          if (driveType === "0" || driveType === "2" || driveType === "4") {
+            return "Network, removable, or unknown drive type is not supported";
           }
         } catch (error: unknown) {
-          if ((error as Error & { code?: string }).code === 'ETIMEDOUT') {
-            return 'Network, removable, or unknown drive type is not supported';
+          if ((error as Error & { code?: string }).code === "ETIMEDOUT") {
+            return "Network, removable, or unknown drive type is not supported";
           }
           console.error(`Error checking drive type:`, error);
           // Fail safe: treat any errors as potential network drives
-          return 'Unable to verify if drive is local';
+          return "Unable to verify if drive is local";
         }
       }
     } else {
       // Unix network mounts (common mount points)
-      const networkPaths = ['/net/', '/mnt/', '/media/', '/Volumes/'];
-      if (networkPaths.some(prefix => realPath.startsWith(prefix))) {
+      const networkPaths = ["/net/", "/mnt/", "/media/", "/Volumes/"];
+      if (networkPaths.some((prefix) => realPath.startsWith(prefix))) {
         // Check if it's a network mount using df
         // Check Unix mount type
         const cmd = `df -P "${realPath}" | tail -n 1`;
         try {
           const { stdout, stderr } = await exec(cmd, { timeout: 5000 })
             .catch((error: Error & { code?: string }) => {
-              if (error.code === 'ETIMEDOUT') {
+              if (error.code === "ETIMEDOUT") {
                 // Timeout often indicates a network mount
-                return { stdout: 'network', stderr: '' };
+                return { stdout: "network", stderr: "" };
               }
               throw error;
             });
@@ -200,27 +207,28 @@ export async function checkLocalPath(vaultPath: string): Promise<string | null> 
           }
 
           // Check for common network filesystem indicators
-          const isNetwork = stdout.match(/^(nfs|cifs|smb|afp|ftp|ssh|davfs)/i) ||
-                          stdout.includes(':') ||
-                          stdout.includes('//') ||
-                          stdout.includes('type fuse.') ||
-                          stdout.includes('network');
+          const isNetwork =
+            stdout.match(/^(nfs|cifs|smb|afp|ftp|ssh|davfs)/i) ||
+            stdout.includes(":") ||
+            stdout.includes("//") ||
+            stdout.includes("type fuse.") ||
+            stdout.includes("network");
 
           if (isNetwork) {
-            return 'Network or remote filesystem is not supported';
+            return "Network or remote filesystem is not supported";
           }
         } catch (error: unknown) {
           console.error(`Error checking mount type:`, error);
           // Fail safe: treat any errors as potential network mounts
-          return 'Unable to verify if filesystem is local';
+          return "Unable to verify if filesystem is local";
         }
       }
     }
 
     return null;
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ELOOP') {
-      return 'Contains circular symlinks';
+    if ((error as NodeJS.ErrnoException).code === "ELOOP") {
+      return "Contains circular symlinks";
     }
     return null; // Other errors will be caught by the main validation
   }
@@ -231,32 +239,51 @@ export async function checkLocalPath(vaultPath: string): Promise<string | null> 
  * @param vaultPath - The path to check
  * @returns Error message if suspicious, null if valid
  */
-export async function checkSuspiciousPath(vaultPath: string): Promise<string | null> {
+export async function checkSuspiciousPath(
+  vaultPath: string,
+): Promise<string | null> {
   // Check for hidden directories (except .obsidian)
-  if (vaultPath.split(path.sep).some(part => 
-    part.startsWith('.') && part !== '.obsidian')) {
-    return 'Contains hidden directories';
+  if (
+    vaultPath.split(path.sep).some((part) =>
+      part.startsWith(".") && part !== ".obsidian"
+    )
+  ) {
+    return "Contains hidden directories";
   }
 
   // Check for system directories
   const systemDirs = [
-    '/bin', '/sbin', '/usr/bin', '/usr/sbin',
-    '/etc', '/var', '/tmp', '/dev', '/sys',
-    'C:\\Windows', 'C:\\Program Files', 'C:\\System32',
-    'C:\\Users\\All Users', 'C:\\ProgramData'
+    "/bin",
+    "/sbin",
+    "/usr/bin",
+    "/usr/sbin",
+    "/etc",
+    "/var",
+    "/tmp",
+    "/dev",
+    "/sys",
+    "C:\\Windows",
+    "C:\\Program Files",
+    "C:\\System32",
+    "C:\\Users\\All Users",
+    "C:\\ProgramData",
   ];
-  if (systemDirs.some(dir => vaultPath.toLowerCase().startsWith(dir.toLowerCase()))) {
-    return 'Points to a system directory';
+  if (
+    systemDirs.some((dir) =>
+      vaultPath.toLowerCase().startsWith(dir.toLowerCase())
+    )
+  ) {
+    return "Points to a system directory";
   }
 
   // Check for home directory root (too broad access)
   if (vaultPath === os.homedir()) {
-    return 'Points to home directory root';
+    return "Points to home directory root";
   }
 
   // Check for path length
   if (vaultPath.length > 255) {
-    return 'Path is too long (maximum 255 characters)';
+    return "Path is too long (maximum 255 characters)";
   }
 
   // Check for problematic characters
@@ -278,7 +305,7 @@ export function normalizePath(inputPath: string): string {
   if (!inputPath || typeof inputPath !== "string") {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Invalid path: ${inputPath}`
+      `Invalid path: ${inputPath}`,
     );
   }
 
@@ -287,18 +314,21 @@ export function normalizePath(inputPath: string): string {
     let normalized = inputPath;
 
     // Only validate filename portion for invalid Windows characters, allowing : for drive letters
-    const filename = normalized.split(/[\\/]/).pop() || '';
-    if (/[<>"|?*]/.test(filename) || (/:/.test(filename) && !/^[A-Za-z]:$/.test(filename))) {
+    const filename = normalized.split(/[\\/]/).pop() || "";
+    if (
+      /[<>"|?*]/.test(filename) ||
+      (/:/.test(filename) && !/^[A-Za-z]:$/.test(filename))
+    ) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `Filename contains invalid characters: ${filename}`
+        `Filename contains invalid characters: ${filename}`,
       );
     }
-    
+
     // Preserve UNC paths
-    if (normalized.startsWith('\\\\')) {
+    if (normalized.startsWith("\\\\")) {
       // Convert to forward slashes but preserve exactly two leading slashes
-      normalized = '//' + normalized.slice(2).replace(/\\/g, '/');
+      normalized = "//" + normalized.slice(2).replace(/\\/g, "/");
       return normalized;
     }
 
@@ -307,40 +337,46 @@ export function normalizePath(inputPath: string): string {
       // Normalize path while preserving drive letter
       normalized = path.normalize(normalized);
       // Convert to forward slashes for consistency
-      normalized = normalized.replace(/\\/g, '/');
+      normalized = normalized.replace(/\\/g, "/");
       return normalized;
     }
 
     // Only restrict critical system directories
     const restrictedDirs = [
-      'C:\\Windows',
-      'C:\\Program Files',
-      'C:\\Program Files (x86)',
-      'C:\\ProgramData'
+      "C:\\Windows",
+      "C:\\Program Files",
+      "C:\\Program Files (x86)",
+      "C:\\ProgramData",
     ];
-    if (restrictedDirs.some(dir => normalized.toLowerCase().startsWith(dir.toLowerCase()))) {
+    if (
+      restrictedDirs.some((dir) =>
+        normalized.toLowerCase().startsWith(dir.toLowerCase())
+      )
+    ) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        `Path points to restricted system directory: ${normalized}`
+        `Path points to restricted system directory: ${normalized}`,
       );
     }
 
     // Handle relative paths
-    if (normalized.startsWith('./') || normalized.startsWith('../')) {
+    if (normalized.startsWith("./") || normalized.startsWith("../")) {
       normalized = path.normalize(normalized);
       return path.resolve(normalized);
     }
 
     // Default normalization for other paths
-    normalized = normalized.replace(/\\/g, '/');
-    if (normalized.startsWith('./') || normalized.startsWith('../')) {
+    normalized = normalized.replace(/\\/g, "/");
+    if (normalized.startsWith("./") || normalized.startsWith("../")) {
       return path.resolve(normalized);
     }
     return normalized;
   } catch (error) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Failed to normalize path: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to normalize path: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 }
@@ -351,7 +387,10 @@ export function normalizePath(inputPath: string): string {
  * @param targetPath - The target path to check
  * @returns True if target is within base path, false otherwise
  */
-export async function checkPathSafety(basePath: string, targetPath: string): Promise<boolean> {
+export async function checkPathSafety(
+  basePath: string,
+  targetPath: string,
+): Promise<boolean> {
   const resolvedPath = normalizePath(targetPath);
   const resolvedBasePath = normalizePath(basePath);
 
@@ -359,7 +398,7 @@ export async function checkPathSafety(basePath: string, targetPath: string): Pro
     // Check real path for symlinks
     const realPath = await fs.realpath(resolvedPath);
     const normalizedReal = normalizePath(realPath);
-    
+
     // Check if real path is within base path
     if (!normalizedReal.startsWith(resolvedBasePath)) {
       return false;
@@ -388,7 +427,7 @@ export async function checkPathSafety(basePath: string, targetPath: string): Pro
  */
 export function ensureMarkdownExtension(filePath: string): string {
   const normalized = normalizePath(filePath);
-  return normalized.endsWith('.md') ? normalized : `${normalized}.md`;
+  return normalized.endsWith(".md") ? normalized : `${normalized}.md`;
 }
 
 /**
@@ -401,7 +440,7 @@ export function validateVaultPath(vaultPath: string, targetPath: string): void {
   if (!checkPathSafety(vaultPath, targetPath)) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Path must be within the vault directory. Path: ${targetPath}, Vault: ${vaultPath}`
+      `Path must be within the vault directory. Path: ${targetPath}, Vault: ${vaultPath}`,
     );
   }
 }
@@ -416,9 +455,9 @@ export function validateVaultPath(vaultPath: string, targetPath: string): void {
 export function safeJoinPath(vaultPath: string, ...segments: string[]): string {
   const joined = path.join(vaultPath, ...segments);
   const resolved = normalizePath(joined);
-  
+
   validateVaultPath(vaultPath, resolved);
-  
+
   return resolved;
 }
 
@@ -431,11 +470,11 @@ export function sanitizeVaultName(name: string): string {
   return name
     .toLowerCase()
     // Replace spaces and special characters with hyphens
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9]+/g, "-")
     // Remove leading/trailing hyphens
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-+|-+$/g, "") ||
     // Ensure name isn't empty
-    || 'unnamed-vault';
+    "unnamed-vault";
 }
 
 /**
@@ -446,7 +485,7 @@ export function sanitizeVaultName(name: string): string {
  */
 export function isParentPath(parent: string, child: string): boolean {
   const relativePath = path.relative(parent, child);
-  return !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+  return !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
 }
 
 /**
@@ -456,9 +495,9 @@ export function isParentPath(parent: string, child: string): boolean {
  */
 export function checkPathOverlap(paths: string[]): void {
   // First normalize all paths to handle . and .. and symlinks
-  const normalizedPaths = paths.map(p => {
+  const normalizedPaths = paths.map((p) => {
     // Remove trailing slashes and normalize separators
-    return path.normalize(p).replace(/[\/\\]+$/, '');
+    return path.normalize(p).replace(/[\/\\]+$/, "");
   });
 
   // Check for exact duplicates using normalized paths
@@ -468,10 +507,10 @@ export function checkPathOverlap(paths: string[]): void {
       throw new McpError(
         ErrorCode.InvalidRequest,
         `Duplicate vault path provided:\n` +
-        `  Original paths:\n` +
-        `    1: ${paths[index]}\n` +
-        `    2: ${paths[normalizedPaths.indexOf(normalizedPath)]}\n` +
-        `  Both resolve to: ${normalizedPath}`
+          `  Original paths:\n` +
+          `    1: ${paths[index]}\n` +
+          `    2: ${paths[normalizedPaths.indexOf(normalizedPath)]}\n` +
+          `  Both resolve to: ${normalizedPath}`,
       );
     }
     uniquePaths.add(normalizedPath);
@@ -480,17 +519,19 @@ export function checkPathOverlap(paths: string[]): void {
   // Then check for overlapping paths using normalized paths
   for (let i = 0; i < normalizedPaths.length; i++) {
     for (let j = i + 1; j < normalizedPaths.length; j++) {
-      if (isParentPath(normalizedPaths[i], normalizedPaths[j]) || 
-          isParentPath(normalizedPaths[j], normalizedPaths[i])) {
+      if (
+        isParentPath(normalizedPaths[i], normalizedPaths[j]) ||
+        isParentPath(normalizedPaths[j], normalizedPaths[i])
+      ) {
         throw new McpError(
           ErrorCode.InvalidRequest,
           `Vault paths cannot overlap:\n` +
-          `  Path 1: ${paths[i]}\n` +
-          `  Path 2: ${paths[j]}\n` +
-          `  (One vault directory cannot be inside another)\n` +
-          `  Normalized paths:\n` +
-          `    1: ${normalizedPaths[i]}\n` +
-          `    2: ${normalizedPaths[j]}`
+            `  Path 1: ${paths[i]}\n` +
+            `  Path 2: ${paths[j]}\n` +
+            `  (One vault directory cannot be inside another)\n` +
+            `  Normalized paths:\n` +
+            `    1: ${normalizedPaths[i]}\n` +
+            `    2: ${normalizedPaths[j]}`,
         );
       }
     }

@@ -3,7 +3,10 @@ import { FileOperationResult } from "../../types.ts";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ensureMarkdownExtension, validateVaultPath } from "../../utils/path.ts";
+import {
+  ensureMarkdownExtension,
+  validateVaultPath,
+} from "../../utils/path.ts";
 import { ensureDirectory, fileExists } from "../../utils/files.ts";
 import { createNoteExistsError, handleFsError } from "../../utils/errors.ts";
 import { createToolResponse, formatFileResult } from "../../utils/responses.ts";
@@ -16,23 +19,31 @@ const schema = z.object({
     .describe("Name of the vault to create the note in"),
   filename: z.string()
     .min(1, "Filename cannot be empty")
-    .refine(name => !name.includes('/') && !name.includes('\\'), 
-      "Filename cannot contain path separators - use the 'folder' parameter for paths instead. Example: use filename:'note.md', folder:'my/path' instead of filename:'my/path/note.md'")
-    .describe("Just the note name without any path separators (e.g. 'my-note.md', NOT 'folder/my-note.md'). Will add .md extension if missing"),
+    .refine(
+      (name) => !name.includes("/") && !name.includes("\\"),
+      "Filename cannot contain path separators - use the 'folder' parameter for paths instead. Example: use filename:'note.md', folder:'my/path' instead of filename:'my/path/note.md'",
+    )
+    .describe(
+      "Just the note name without any path separators (e.g. 'my-note.md', NOT 'folder/my-note.md'). Will add .md extension if missing",
+    ),
   content: z.string()
     .min(1, "Content cannot be empty")
     .describe("Content of the note in markdown format"),
   folder: z.string()
     .optional()
-    .refine(folder => !folder || !path.isAbsolute(folder), 
-      "Folder must be a relative path")
-    .describe("Optional subfolder path relative to vault root (e.g. 'journal/subfolder'). Use this for the path instead of including it in filename")
+    .refine(
+      (folder) => !folder || !path.isAbsolute(folder),
+      "Folder must be a relative path",
+    )
+    .describe(
+      "Optional subfolder path relative to vault root (e.g. 'journal/subfolder'). Use this for the path instead of including it in filename",
+    ),
 }).strict();
 
 async function createNote(
   args: z.infer<typeof schema>,
   vaultPath: string,
-  _vaultName: string
+  _vaultName: string,
 ): Promise<FileOperationResult> {
   const sanitizedFilename = ensureMarkdownExtension(args.filename);
 
@@ -54,19 +65,19 @@ async function createNote(
     }
 
     // File doesn't exist, proceed with creation
-    await fs.writeFile(notePath, args.content, 'utf8');
-    
+    await fs.writeFile(notePath, args.content, "utf8");
+
     return {
       success: true,
       message: "Note created successfully",
       path: notePath,
-      operation: 'create'
+      operation: "create",
     };
   } catch (error) {
     if (error instanceof McpError) {
       throw error;
     }
-    throw handleFsError(error, 'create note');
+    throw handleFsError(error, "create note");
   }
 }
 
@@ -75,7 +86,8 @@ type CreateNoteArgs = z.infer<typeof schema>;
 export function createCreateNoteTool(vaults: Map<string, string>) {
   return createTool<CreateNoteArgs>({
     name: "create-note",
-    description: `Create a new note in the specified vault with markdown content.
+    description:
+      `Create a new note in the specified vault with markdown content.
 
 Examples:
 - Root note: { "vault": "vault1", "filename": "note.md" }
@@ -85,6 +97,6 @@ Examples:
     handler: async (args, vaultPath, vaultName) => {
       const result = await createNote(args, vaultPath, vaultName);
       return createToolResponse(formatFileResult(result));
-    }
+    },
   }, vaults);
 }

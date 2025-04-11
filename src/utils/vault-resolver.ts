@@ -1,4 +1,4 @@
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 
 export interface VaultResolutionResult {
   vaultPath: string;
@@ -29,7 +29,9 @@ export class VaultResolver {
     if (!vaultPath) {
       throw new McpError(
         ErrorCode.InvalidParams,
-        `Unknown vault: ${vaultName}. Available vaults: ${Array.from(this.vaults.keys()).join(', ')}`
+        `Unknown vault: ${vaultName}. Available vaults: ${
+          Array.from(this.vaults.keys()).join(", ")
+        }`,
       );
     }
 

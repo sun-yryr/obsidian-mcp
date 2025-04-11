@@ -1,4 +1,4 @@
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { promises as fs } from "node:fs";
 
 export interface VaultResource {
@@ -33,16 +33,18 @@ export async function getVaultMetadata(vaultPath: string): Promise<{
   try {
     await fs.access(vaultPath);
     return {
-      isAccessible: true
+      isAccessible: true,
     };
   } catch {
     return {
-      isAccessible: false
+      isAccessible: false,
     };
   }
 }
 
-export async function listVaultResources(vaults: Map<string, string>): Promise<(VaultResource | VaultListResource)[]> {
+export async function listVaultResources(
+  vaults: Map<string, string>,
+): Promise<(VaultResource | VaultListResource)[]> {
   const resources: (VaultResource | VaultListResource)[] = [];
 
   // Add root resource that lists all vaults
@@ -50,11 +52,12 @@ export async function listVaultResources(vaults: Map<string, string>): Promise<(
     uri: "obsidian-vault://",
     name: "Available Vaults",
     mimeType: "application/json",
-    description: "List of all available Obsidian vaults and their access status",
+    description:
+      "List of all available Obsidian vaults and their access status",
     metadata: {
       totalVaults: vaults.size,
-      vaults: []
-    }
+      vaults: [],
+    },
   };
 
   // Process each vault
@@ -66,7 +69,7 @@ export async function listVaultResources(vaults: Map<string, string>): Promise<(
       vaultList.metadata?.vaults.push({
         name: vaultName,
         path: vaultPath,
-        isAccessible: metadata.isAccessible
+        isAccessible: metadata.isAccessible,
       });
 
       // Add individual vault resource
@@ -77,8 +80,8 @@ export async function listVaultResources(vaults: Map<string, string>): Promise<(
         description: `Access information for the ${vaultName} vault`,
         metadata: {
           path: vaultPath,
-          isAccessible: metadata.isAccessible
-        }
+          isAccessible: metadata.isAccessible,
+        },
       });
     } catch (error) {
       console.error(`Error processing vault ${vaultName}:`, error);
@@ -86,7 +89,7 @@ export async function listVaultResources(vaults: Map<string, string>): Promise<(
       vaultList.metadata?.vaults.push({
         name: vaultName,
         path: vaultPath,
-        isAccessible: false
+        isAccessible: false,
       });
     }
   }
@@ -99,7 +102,7 @@ export async function listVaultResources(vaults: Map<string, string>): Promise<(
 
 export async function readVaultResource(
   vaults: Map<string, string>,
-  uri: string
+  uri: string,
 ): Promise<{ uri: string; mimeType: string; text: string }> {
   const vaultName = uri.replace("obsidian-vault://", "");
   const vaultPath = vaults.get(vaultName);
@@ -107,7 +110,7 @@ export async function readVaultResource(
   if (!vaultPath) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Unknown vault: ${vaultName}`
+      `Unknown vault: ${vaultName}`,
     );
   }
 
@@ -116,10 +119,14 @@ export async function readVaultResource(
   return {
     uri,
     mimeType: "application/json",
-    text: JSON.stringify({
-      name: vaultName,
-      path: vaultPath,
-      isAccessible: metadata.isAccessible
-    }, null, 2)
+    text: JSON.stringify(
+      {
+        name: vaultName,
+        path: vaultPath,
+        isAccessible: metadata.isAccessible,
+      },
+      null,
+      2,
+    ),
   };
 }

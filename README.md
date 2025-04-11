@@ -2,11 +2,16 @@
 
 [![smithery badge](https://smithery.ai/badge/obsidian-mcp)](https://smithery.ai/server/obsidian-mcp)
 
-An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that enables AI assistants to interact with Obsidian vaults, providing tools for reading, creating, editing and managing notes and tags.
+An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that
+enables AI assistants to interact with Obsidian vaults, providing tools for
+reading, creating, editing and managing notes and tags.
 
 ## Warning!!!
 
-This MCP has read and write access (if you allow it). Please. PLEASE backup your Obsidian vault prior to using obsidian-mcp to manage your notes. I recommend using git, but any backup method will work. These tools have been tested, but not thoroughly, and this MCP is in active development.
+This MCP has read and write access (if you allow it). Please. PLEASE backup your
+Obsidian vault prior to using obsidian-mcp to manage your notes. I recommend
+using git, but any backup method will work. These tools have been tested, but
+not thoroughly, and this MCP is in active development.
 
 ## Features
 
@@ -33,16 +38,22 @@ Add to your Claude Desktop configuration:
 
 ```json
 {
-    "mcpServers": {
-        "obsidian": {
-            "command": "npx",
-            "args": ["-y", "obsidian-mcp", "/path/to/your/vault", "/path/to/your/vault2"]
-        }
+  "mcpServers": {
+    "obsidian": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "obsidian-mcp",
+        "/path/to/your/vault",
+        "/path/to/your/vault2"
+      ]
     }
+  }
 }
 ```
 
-Replace `/path/to/your/vault` with the absolute path to your Obsidian vault. For example:
+Replace `/path/to/your/vault` with the absolute path to your Obsidian vault. For
+example:
 
 MacOS/Linux:
 
@@ -56,18 +67,21 @@ Windows:
 "C:\\Users\\username\\Documents\\MyVault"
 ```
 
-Restart Claude for Desktop after saving the configuration. You should see the hammer icon appear, indicating the server is connected.
+Restart Claude for Desktop after saving the configuration. You should see the
+hammer icon appear, indicating the server is connected.
 
 If you have connection issues, check the logs at:
 
 - MacOS: `~/Library/Logs/Claude/mcp*.log`
 - Windows: `%APPDATA%\Claude\logs\mcp*.log`
 
-
 ### Installing via Smithery
-Warning: I am not affiliated with Smithery. I have not tested using it and encourage users to install manually if they can.
 
-To install Obsidian for Claude Desktop automatically via [Smithery](https://smithery.ai/server/obsidian-mcp):
+Warning: I am not affiliated with Smithery. I have not tested using it and
+encourage users to install manually if they can.
+
+To install Obsidian for Claude Desktop automatically via
+[Smithery](https://smithery.ai/server/obsidian-mcp):
 
 ```bash
 npx -y @smithery/cli install obsidian-mcp --client claude
@@ -91,12 +105,16 @@ Then add to your Claude Desktop configuration:
 
 ```json
 {
-    "mcpServers": {
-        "obsidian": {
-            "command": "node",
-            "args": ["<absolute-path-to-obsidian-mcp>/build/main.js", "/path/to/your/vault", "/path/to/your/vault2"]
-        }
+  "mcpServers": {
+    "obsidian": {
+      "command": "node",
+      "args": [
+        "<absolute-path-to-obsidian-mcp>/build/main.js",
+        "/path/to/your/vault",
+        "/path/to/your/vault2"
+      ]
     }
+  }
 }
 ```
 
@@ -113,7 +131,8 @@ Then add to your Claude Desktop configuration:
 - `remove-tags` - Remove tags from a note
 - `rename-tag` - Rename a tag across all notes
 - `manage-tags` - List and organize tags
-- `list-available-vaults` - List all available vaults (helps with multi-vault setups)
+- `list-available-vaults` - List all available vaults (helps with multi-vault
+  setups)
 
 ## Documentation
 
@@ -124,7 +143,8 @@ Additional documentation can be found in the `docs` directory:
 
 ## Security
 
-This server requires access to your Obsidian vault directory. When configuring the server, make sure to:
+This server requires access to your Obsidian vault directory. When configuring
+the server, make sure to:
 
 - Only provide access to your intended vault directory
 - Review tool actions before approving them

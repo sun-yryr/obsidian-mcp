@@ -1,4 +1,4 @@
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
+import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import { Prompt } from "../types.ts";
 
 const prompts = new Map<string, Prompt>();
@@ -10,7 +10,7 @@ export function registerPrompt(prompt: Prompt): void {
   if (prompts.has(prompt.name)) {
     throw new McpError(
       ErrorCode.InvalidRequest,
-      `Prompt "${prompt.name}" is already registered`
+      `Prompt "${prompt.name}" is already registered`,
     );
   }
   prompts.set(prompt.name, prompt);
@@ -21,18 +21,22 @@ export function registerPrompt(prompt: Prompt): void {
  */
 export function listPrompts() {
   return {
-    prompts: Array.from(prompts.values()).map(prompt => ({
+    prompts: Array.from(prompts.values()).map((prompt) => ({
       name: prompt.name,
       description: prompt.description,
-      arguments: prompt.arguments
-    }))
+      arguments: prompt.arguments,
+    })),
   };
 }
 
 /**
  * Get a specific prompt by name
  */
-export async function getPrompt(name: string, vaults: Map<string, string>, args?: any) {
+export async function getPrompt(
+  name: string,
+  vaults: Map<string, string>,
+  args?: any,
+) {
   const prompt = prompts.get(name);
   if (!prompt) {
     throw new McpError(ErrorCode.MethodNotFound, `Prompt not found: ${name}`);
@@ -46,7 +50,9 @@ export async function getPrompt(name: string, vaults: Map<string, string>, args?
     }
     throw new McpError(
       ErrorCode.InternalError,
-      `Failed to execute prompt: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to execute prompt: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
   }
 }

@@ -44,7 +44,7 @@ export interface SearchOptions {
   useRegex?: boolean;
   maxResults?: number;
   path?: string;
-  searchType?: 'content' | 'filename' | 'both';
+  searchType?: "content" | "filename" | "both";
 }
 
 // Tag types
@@ -100,7 +100,7 @@ export interface BatchOperationResult {
 export interface FileOperationResult {
   success: boolean;
   message: string;
-  operation: 'create' | 'edit' | 'delete' | 'move';
+  operation: "create" | "edit" | "delete" | "move";
   path: string;
 }
 

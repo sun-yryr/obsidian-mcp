@@ -2,16 +2,16 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { validateVaultPath } from "../../utils/path.js";
-import { fileExists, safeReadFile } from "../../utils/files.js";
+import { validateVaultPath } from "../../utils/path.ts";
+import { fileExists, safeReadFile } from "../../utils/files.ts";
 import {
   validateTag,
   parseNote,
   stringifyNote,
   removeTagsFromFrontmatter,
   removeInlineTags
-} from "../../utils/tags.js";
-import { createTool } from "../../utils/tool-factory.js";
+} from "../../utils/tags.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({

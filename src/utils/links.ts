@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { getAllMarkdownFiles } from "./files.js";
+import { getAllMarkdownFiles } from "./files.ts";
 
 interface LinkUpdateOptions {
   filePath: string;

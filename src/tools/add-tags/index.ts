@@ -1,19 +1,19 @@
 import { z } from "zod";
-import { TagOperationResult } from "../../types.js";
+import { TagOperationResult } from "../../types.ts";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { validateVaultPath } from "../../utils/path.js";
-import { fileExists, safeReadFile } from "../../utils/files.js";
+import { validateVaultPath } from "../../utils/path.ts";
+import { fileExists, safeReadFile } from "../../utils/files.ts";
 import {
   validateTag,
   parseNote,
   stringifyNote,
   addTagsToFrontmatter,
   normalizeTag
-} from "../../utils/tags.js";
-import { createToolResponse, formatTagResult } from "../../utils/responses.js";
-import { createTool } from "../../utils/tool-factory.js";
+} from "../../utils/tags.ts";
+import { createToolResponse, formatTagResult } from "../../utils/responses.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({

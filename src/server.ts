@@ -10,8 +10,8 @@ import {
   McpError,
   ErrorCode
 } from "@modelcontextprotocol/sdk/types.js";
-import { RateLimiter, ConnectionMonitor, validateMessageSize } from "./utils/security.js";
-import { Tool } from "./types.js";
+import { RateLimiter, ConnectionMonitor, validateMessageSize } from "./utils/security.ts";
+import { Tool } from "./types.ts";
 import { z } from "zod";
 import path from "node:path";
 import os from 'node:os';
@@ -19,9 +19,9 @@ import fs from 'node:fs';
 import {
   listVaultResources,
   readVaultResource
-} from "./resources/resources.js";
-import { listPrompts, getPrompt, registerPrompt } from "./utils/prompt-factory.js";
-import { listVaultsPrompt } from "./prompts/list-vaults/index.js";
+} from "./resources/resources.ts";
+import { listPrompts, getPrompt, registerPrompt } from "./utils/prompt-factory.ts";
+import { listVaultsPrompt } from "./prompts/list-vaults/index.ts";
 
 // Utility function to expand home directory
 function expandHome(filepath: string): string {

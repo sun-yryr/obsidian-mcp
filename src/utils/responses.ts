@@ -7,7 +7,7 @@ import {
   SearchOperationResult,
   TagChange,
   SearchResult
-} from '../types.js';
+} from '../types.ts';
 
 /**
  * Creates a standardized tool response

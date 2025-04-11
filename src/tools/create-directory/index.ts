@@ -2,7 +2,7 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { createTool } from "../../utils/tool-factory.js";
+import { createTool } from "../../utils/tool-factory.ts"
 
 // Input validation schema with descriptions
 const schema = z.object({

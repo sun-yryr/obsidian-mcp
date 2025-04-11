@@ -1,5 +1,5 @@
-import { createToolResponse } from "../../utils/responses.js";
-import { createToolNoArgs } from "../../utils/tool-factory.js";
+import { createToolResponse } from "../../utils/responses.ts";
+import { createToolNoArgs } from "../../utils/tool-factory.ts";
 
 export const createListAvailableVaultsTool = (vaults: Map<string, string>) => {
   return createToolNoArgs({

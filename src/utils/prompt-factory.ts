@@ -1,5 +1,5 @@
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { Prompt } from "../types.js";
+import { Prompt } from "../types.ts";
 
 const prompts = new Map<string, Prompt>();
 

@@ -7,13 +7,13 @@ import {
   normalizeTag,
   parseNote,
   stringifyNote
-} from "../../utils/tags.js";
+} from "../../utils/tags.ts";
 import {
   getAllMarkdownFiles,
   safeReadFile,
   fileExists
-} from "../../utils/files.js";
-import { createTool } from "../../utils/tool-factory.js";
+} from "../../utils/files.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({

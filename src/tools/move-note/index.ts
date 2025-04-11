@@ -2,11 +2,11 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError } from "@modelcontextprotocol/sdk/types.js";
-import { ensureMarkdownExtension, validateVaultPath } from "../../utils/path.js";
-import { fileExists, ensureDirectory } from "../../utils/files.js";
-import { updateVaultLinks } from "../../utils/links.js";
-import { createNoteExistsError, createNoteNotFoundError, handleFsError } from "../../utils/errors.js";
-import { createTool } from "../../utils/tool-factory.js";
+import { ensureMarkdownExtension, validateVaultPath } from "../../utils/path.ts";
+import { fileExists, ensureDirectory } from "../../utils/files.ts";
+import { updateVaultLinks } from "../../utils/links.ts";
+import { createNoteExistsError, createNoteNotFoundError, handleFsError } from "../../utils/errors.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({

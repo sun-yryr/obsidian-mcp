@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-import { ObsidianServer } from "./server.js";
-import { createCreateNoteTool } from "./tools/create-note/index.js";
-import { createListAvailableVaultsTool } from "./tools/list-available-vaults/index.js";
-import { createEditNoteTool } from "./tools/edit-note/index.js";
-import { createSearchVaultTool } from "./tools/search-vault/index.js";
-import { createMoveNoteTool } from "./tools/move-note/index.js";
-import { createCreateDirectoryTool } from "./tools/create-directory/index.js";
-import { createDeleteNoteTool } from "./tools/delete-note/index.js";
-import { createAddTagsTool } from "./tools/add-tags/index.js";
-import { createRemoveTagsTool } from "./tools/remove-tags/index.js";
-import { createRenameTagTool } from "./tools/rename-tag/index.js";
-import { createReadNoteTool } from "./tools/read-note/index.js";
-import { listVaultsPrompt } from "./prompts/list-vaults/index.js";
-import { registerPrompt } from "./utils/prompt-factory.js";
+import { ObsidianServer } from "./server.ts";
+import { createCreateNoteTool } from "./tools/create-note/index.ts";
+import { createListAvailableVaultsTool } from "./tools/list-available-vaults/index.ts";
+import { createEditNoteTool } from "./tools/edit-note/index.ts";
+import { createSearchVaultTool } from "./tools/search-vault/index.ts";
+import { createMoveNoteTool } from "./tools/move-note/index.ts";
+import { createCreateDirectoryTool } from "./tools/create-directory/index.ts";
+import { createDeleteNoteTool } from "./tools/delete-note/index.ts";
+import { createAddTagsTool } from "./tools/add-tags/index.ts";
+import { createRemoveTagsTool } from "./tools/remove-tags/index.ts";
+import { createRenameTagTool } from "./tools/rename-tag/index.ts";
+import { createReadNoteTool } from "./tools/read-note/index.ts";
+import { listVaultsPrompt } from "./prompts/list-vaults/index.ts";
+import { registerPrompt } from "./utils/prompt-factory.ts";
 import path from "node:path";
 import os from "node:os";
 import { promises as fs, constants as fsConstants } from "node:fs";
@@ -23,7 +23,7 @@ import {
   checkSuspiciousPath,
   sanitizeVaultName,
   checkPathOverlap 
-} from "./utils/path.js";
+} from "./utils/path.ts";
 
 interface VaultConfig {
   name: string;

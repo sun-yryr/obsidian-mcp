@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { SearchResult, SearchOperationResult, SearchOptions } from "../../types.js";
+import { SearchResult, SearchOperationResult, SearchOptions } from "../../types.ts";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { validateVaultPath, safeJoinPath, normalizePath } from "../../utils/path.js";
-import { getAllMarkdownFiles } from "../../utils/files.js";
-import { handleFsError } from "../../utils/errors.js";
-import { extractTags, normalizeTag, matchesTagPattern } from "../../utils/tags.js";
-import { createToolResponse, formatSearchResult } from "../../utils/responses.js";
-import { createTool } from "../../utils/tool-factory.js";
+import { validateVaultPath, safeJoinPath, normalizePath } from "../../utils/path.ts";
+import { getAllMarkdownFiles } from "../../utils/files.ts";
+import { handleFsError } from "../../utils/errors.ts";
+import { extractTags, normalizeTag, matchesTagPattern } from "../../utils/tags.ts";
+import { createToolResponse, formatSearchResult } from "../../utils/responses.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
 const schema = z.object({

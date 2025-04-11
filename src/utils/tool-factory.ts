@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { Tool } from "../types.js";
+import { Tool } from "../types.ts";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { createSchemaHandler } from "./schema.js";
-import { VaultResolver } from "./vault-resolver.js";
+import { createSchemaHandler } from "./schema.ts";
+import { VaultResolver } from "./vault-resolver.ts";
 
 export interface BaseToolConfig<T> {
   name: string;

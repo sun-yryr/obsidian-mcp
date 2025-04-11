@@ -2,8 +2,8 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import { validateVaultPath } from "../../utils/path.js";
-import { fileExists, safeReadFile } from "../../utils/files.js";
+import { validateVaultPath } from "../../utils/path.ts";
+import { fileExists, safeReadFile } from "../../utils/files.ts";
 import {
   validateTag,
   parseNote,
@@ -12,8 +12,8 @@ import {
   removeTagsFromFrontmatter,
   removeInlineTags,
   normalizeTag
-} from "../../utils/tags.js";
-import { createTool } from "../../utils/tool-factory.js";
+} from "../../utils/tags.ts";
+import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema
 const schema = z.object({

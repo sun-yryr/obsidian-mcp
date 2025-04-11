@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "start": "deno run -S=\"homedir,uid\" -N=localhost -R -W src/main.ts",
+    "compile": "deno compile -S=\"homedir,uid\" -N=localhost -R -W --output obsidian_mcp src/main.ts"
+  },
+  "imports": {
+    "yaml": "npm:yaml@^2.6.1",
+    "zod": "npm:zod@^3.22.4",
+    "zod-to-json-schema": "npm:zod-to-json-schema@^3.24.1",
+    "@modelcontextprotocol/sdk": "npm:@modelcontextprotocol/sdk@^1.0.4"
+  }
+}

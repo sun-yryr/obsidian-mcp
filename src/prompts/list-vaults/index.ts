@@ -1,4 +1,4 @@
-import { Prompt, PromptResult } from "../../types.js";
+import { Prompt, PromptResult } from "../../types.ts";
 
 /**
  * Generates the system prompt for tool usage

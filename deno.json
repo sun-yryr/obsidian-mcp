@@ -1,8 +1,7 @@
 {
   "tasks": {
     "start": "deno run -S=\"homedir,uid\" -N=localhost -R -W src/main.ts",
-    "compile": "deno compile -S=\"homedir,uid\" -N=localhost -R -W --output obsidian_mcp src/main.ts",
-    "release": "deno compile -S=\"homedir,uid\" -N=localhost -R -W src/main.ts"
+    "compile": "deno compile -S=\"homedir,uid\" -N=localhost -R -W --output obsidian_mcp src/main.ts"
   },
   "imports": {
     "yaml": "npm:yaml@^2.6.1",

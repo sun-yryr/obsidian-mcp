@@ -15,26 +15,26 @@ jobs:
         with:
           deno-version: v2.x
       - name: Compile(win-x86)
-        run: deno task release --target ${TARGET} --output=release/obsidian-mcp-${TARGET}
+        run: deno compile -S="homedir,uid" -N=localhost -R -W --target ${TARGET} --output=releases/obsidian-mcp-${TARGET} src/main.ts
         env:
           TARGET: x86_64-pc-windows-msvc
       - name: Compile(macos-x86)
-        run: deno task release --target ${TARGET} --output=release/obsidian-mcp-${TARGET}
+        run: deno compile -S="homedir,uid" -N=localhost -R -W --target ${TARGET} --output=releases/obsidian-mcp-${TARGET} src/main.ts
         env:
           TARGET: x86_64-apple-darwin
       - name: Compile(macos-arm)
-        run: deno task release --target ${TARGET} --output=release/obsidian-mcp-${TARGET}
+        run: deno compile -S="homedir,uid" -N=localhost -R -W --target ${TARGET} --output=releases/obsidian-mcp-${TARGET} src/main.ts
         env:
           TARGET: aarch64-apple-darwin
       - name: Compile(linux-x86)
-        run: deno task release --target ${TARGET} --output=release/obsidian-mcp-${TARGET}
+        run: deno compile -S="homedir,uid" -N=localhost -R -W --target ${TARGET} --output=releases/obsidian-mcp-${TARGET} src/main.ts
         env:
           TARGET: x86_64-unknown-linux-gnu
       - name: Compile(linux-arm)
-        run: deno task release --target ${TARGET} --output=release/obsidian-mcp-${TARGET}
+        run: deno compile -S="homedir,uid" -N=localhost -R -W --target ${TARGET} --output=releases/obsidian-mcp-${TARGET} src/main.ts
         env:
           TARGET: aarch64-unknown-linux-gnu
       - uses: AButler/upload-release-assets@v3.0
         with:
-          files: release/obsidian-mcp-*
+          files: releases/obsidian-mcp-*
           repo-token: ${{ secrets.GITHUB_TOKEN }}

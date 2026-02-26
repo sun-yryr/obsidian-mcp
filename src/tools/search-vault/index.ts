@@ -10,7 +10,6 @@ import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
 import {
   normalizePath,
   safeJoinPath,
-  validateVaultPath,
 } from "../../utils/path.ts";
 import { getAllMarkdownFiles } from "../../utils/files.ts";
 import { handleFsError } from "../../utils/errors.ts";
@@ -68,7 +67,7 @@ async function searchFilenames(
   try {
     // Use safeJoinPath for path safety
     const searchDir = options.path
-      ? safeJoinPath(vaultPath, options.path)
+      ? await safeJoinPath(vaultPath, options.path)
       : vaultPath;
     const files = await getAllMarkdownFiles(vaultPath, searchDir);
     const results: SearchResult[] = [];
@@ -106,7 +105,7 @@ async function searchContent(
   try {
     // Use safeJoinPath for path safety
     const searchDir = options.path
-      ? safeJoinPath(vaultPath, options.path)
+      ? await safeJoinPath(vaultPath, options.path)
       : vaultPath;
     const files = await getAllMarkdownFiles(vaultPath, searchDir);
     const results: SearchResult[] = [];

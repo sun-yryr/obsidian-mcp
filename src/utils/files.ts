@@ -40,7 +40,7 @@ export async function getAllMarkdownFiles(
     for (const entry of entries) {
       try {
         // Use safeJoinPath to ensure path safety
-        const fullPath = safeJoinPath(normalizedDir, entry.name);
+        const fullPath = await safeJoinPath(normalizedDir, entry.name);
 
         if (entry.isDirectory()) {
           if (!entry.name.startsWith(".")) {

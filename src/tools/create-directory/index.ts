@@ -2,6 +2,7 @@ import { z } from "zod";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { ErrorCode, McpError } from "@modelcontextprotocol/sdk/types.js";
+import { validateVaultPath } from "../../utils/path.ts";
 import { createTool } from "../../utils/tool-factory.ts";
 
 // Input validation schema with descriptions
@@ -33,15 +34,10 @@ async function createDirectory(
   const fullPath = path.join(vaultPath, dirPath);
 
   // Validate path is within vault
-  const normalizedPath = path.normalize(fullPath);
-  if (!normalizedPath.startsWith(path.normalize(vaultPath))) {
-    throw new McpError(
-      ErrorCode.InvalidRequest,
-      "Directory path must be within the vault directory",
-    );
-  }
+  await validateVaultPath(vaultPath, fullPath);
 
   try {
+    const normalizedPath = fullPath;
     // Check if directory already exists
     try {
       await fs.access(normalizedPath);

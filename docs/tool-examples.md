@@ -33,7 +33,7 @@ async function writeFile(
   content: string,
 ): Promise<FileOperationResult> {
   const fullPath = path.join(vaultPath, filePath);
-  validateVaultPath(vaultPath, fullPath);
+  await validateVaultPath(vaultPath, fullPath);
 
   try {
     await ensureDirectory(path.dirname(fullPath));
@@ -139,7 +139,7 @@ async function searchFiles(
       ? path.join(vaultPath, options.path)
       : vaultPath;
 
-    validateVaultPath(vaultPath, searchPath);
+    await validateVaultPath(vaultPath, searchPath);
 
     // Implementation details...
 
@@ -267,7 +267,7 @@ const fullPath = path.join(vaultPath, args.path);
 
 // ✅ Good
 const fullPath = path.join(vaultPath, validated.path);
-validateVaultPath(vaultPath, fullPath);
+await validateVaultPath(vaultPath, fullPath);
 ```
 
 4. **Poor Response Formatting**

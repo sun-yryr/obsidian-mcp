@@ -11,6 +11,9 @@ import { createAddTagsTool } from "./tools/add-tags/index.ts";
 import { createRemoveTagsTool } from "./tools/remove-tags/index.ts";
 import { createRenameTagTool } from "./tools/rename-tag/index.ts";
 import { createReadNoteTool } from "./tools/read-note/index.ts";
+import { createUpdatePropertiesTool } from "./tools/update-properties/index.ts";
+import { createMoveKanbanTaskTool } from "./tools/move-kanban-task/index.ts";
+import { createManageTagsTool } from "./tools/manage-tags/index.ts";
 import { listVaultsPrompt } from "./prompts/list-vaults/index.ts";
 import { registerPrompt } from "./utils/prompt-factory.ts";
 import path from "node:path";
@@ -517,6 +520,9 @@ Examples:
       createRemoveTagsTool(vaultsMap),
       createRenameTagTool(vaultsMap),
       createReadNoteTool(vaultsMap),
+      createUpdatePropertiesTool(vaultsMap),
+      createMoveKanbanTaskTool(vaultsMap),
+      createManageTagsTool(vaultsMap),
     ];
 
     for (const tool of tools) {

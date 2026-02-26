@@ -51,23 +51,22 @@ async function moveKanbanTask(
 
     // Read file content
     const content = await safeReadFile(fullPath);
-    if (content === null) {
+    if (content === undefined) {
       throw new McpError(
         ErrorCode.InternalError,
         `Failed to read file: ${filePath}`,
       );
     }
 
-    const lines = content.split("
-");
+    const lines = content.split("\n");
     let taskLineIndex = -1;
     let targetListHeaderIndex = -1;
     let foundTaskLine = "";
 
     // Regex to match a task line like "- [ ] task text" or "- [x] task text"
     // Escaping special regex characters in the task text
-    const escapedTaskText = taskText.replace(/[.*+?^${}()|[\]\]/g, "\$&");
-    const taskRegex = new RegExp(`^\s*-\s*\[[ xX]\]\s*${escapedTaskText}\s*$`);
+    const escapedTaskText = taskText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const taskRegex = new RegExp(`^\\s*-\\s*\\[[ xX]\\]\\s*${escapedTaskText}\\s*$`);
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -119,8 +118,7 @@ async function moveKanbanTask(
     lines.splice(insertIndex, 0, foundTaskLine);
 
     // Save changes
-    await fs.writeFile(fullPath, lines.join("
-"));
+    await fs.writeFile(fullPath, lines.join("\n"));
 
     return `Successfully moved task "${taskText}" to list "${toListName}" in "${filePath}"`;
   } catch (error) {

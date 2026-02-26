@@ -49,7 +49,7 @@ async function updateProperties(
 
     // Read file content
     const content = await safeReadFile(fullPath);
-    if (content === null) {
+    if (content === undefined) {
       throw new McpError(
         ErrorCode.InternalError,
         `Failed to read note: ${filePath}`,

@@ -313,16 +313,28 @@ export function normalizePath(inputPath: string): string {
     // Handle Windows paths
     let normalized = inputPath;
 
-    // Only validate filename portion for invalid Windows characters, allowing : for drive letters
+    // Only validate filename portion for invalid Windows characters
     const filename = normalized.split(/[\\/]/).pop() || "";
-    if (
-      /[<>"|?*]/.test(filename) ||
-      (/:/.test(filename) && !/^[A-Za-z]:$/.test(filename))
-    ) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        `Filename contains invalid characters: ${filename}`,
-      );
+    const isWindows = process.platform === "win32";
+
+    if (isWindows) {
+      if (
+        /[<>"|?*]/.test(filename) ||
+        (/:/.test(filename) && !/^[A-Za-z]:$/.test(filename))
+      ) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `Filename contains invalid characters for Windows: ${filename}`,
+        );
+      }
+    } else {
+      // Non-Windows: Only null characters are strictly forbidden, but we also check for non-printable
+      if (/[\x00]/.test(filename)) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `Filename contains invalid characters: ${filename}`,
+        );
+      }
     }
 
     // Preserve UNC paths
@@ -341,22 +353,24 @@ export function normalizePath(inputPath: string): string {
       return normalized;
     }
 
-    // Only restrict critical system directories
-    const restrictedDirs = [
-      "C:\\Windows",
-      "C:\\Program Files",
-      "C:\\Program Files (x86)",
-      "C:\\ProgramData",
-    ];
-    if (
-      restrictedDirs.some((dir) =>
-        normalized.toLowerCase().startsWith(dir.toLowerCase())
-      )
-    ) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        `Path points to restricted system directory: ${normalized}`,
-      );
+    // Only restrict critical system directories on Windows
+    if (isWindows) {
+      const restrictedDirs = [
+        "C:\\Windows",
+        "C:\\Program Files",
+        "C:\\Program Files (x86)",
+        "C:\\ProgramData",
+      ];
+      if (
+        restrictedDirs.some((dir) =>
+          normalized.toLowerCase().startsWith(dir.toLowerCase())
+        )
+      ) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `Path points to restricted system directory: ${normalized}`,
+        );
+      }
     }
 
     // Handle relative paths
@@ -372,6 +386,7 @@ export function normalizePath(inputPath: string): string {
     }
     return normalized;
   } catch (error) {
+    if (error instanceof McpError) throw error;
     throw new McpError(
       ErrorCode.InvalidRequest,
       `Failed to normalize path: ${
@@ -391,31 +406,32 @@ export async function checkPathSafety(
   basePath: string,
   targetPath: string,
 ): Promise<boolean> {
-  const resolvedPath = normalizePath(targetPath);
-  const resolvedBasePath = normalizePath(basePath);
-
   try {
-    // Check real path for symlinks
-    const realPath = await fs.realpath(resolvedPath);
-    const normalizedReal = normalizePath(realPath);
+    const resolvedPath = normalizePath(targetPath);
+    const resolvedBasePath = normalizePath(basePath);
 
-    // Check if real path is within base path
-    if (!normalizedReal.startsWith(resolvedBasePath)) {
-      return false;
+    // If they are exactly the same, it's safe (e.g., accessing the vault root)
+    if (resolvedPath === resolvedBasePath) {
+      return true;
+    }
+
+    try {
+      // Check real path for symlinks if path exists
+      const realPath = await fs.realpath(resolvedPath);
+      const normalizedReal = normalizePath(realPath);
+
+      // Check if real path is within base path
+      if (!isParentPath(resolvedBasePath, normalizedReal) && resolvedBasePath !== normalizedReal) {
+        return false;
+      }
+    } catch {
+      // File doesn't exist yet, that's fine for some operations (like creation)
     }
 
     // Check if original path is within base path
-    return resolvedPath.startsWith(resolvedBasePath);
-  } catch (error) {
-    // For new files that don't exist yet, verify parent directory
-    const parentDir = path.dirname(resolvedPath);
-    try {
-      const realParentPath = await fs.realpath(parentDir);
-      const normalizedParent = normalizePath(realParentPath);
-      return normalizedParent.startsWith(resolvedBasePath);
-    } catch {
-      return false;
-    }
+    return isParentPath(resolvedBasePath, resolvedPath);
+  } catch {
+    return false;
   }
 }
 
@@ -436,8 +452,8 @@ export function ensureMarkdownExtension(filePath: string): string {
  * @param targetPath - The target path to validate
  * @throws {McpError} If path is outside vault or invalid
  */
-export function validateVaultPath(vaultPath: string, targetPath: string): void {
-  if (!checkPathSafety(vaultPath, targetPath)) {
+export async function validateVaultPath(vaultPath: string, targetPath: string): Promise<void> {
+  if (!await checkPathSafety(vaultPath, targetPath)) {
     throw new McpError(
       ErrorCode.InvalidRequest,
       `Path must be within the vault directory. Path: ${targetPath}, Vault: ${vaultPath}`,
@@ -452,25 +468,28 @@ export function validateVaultPath(vaultPath: string, targetPath: string): void {
  * @returns The joined and validated path
  * @throws {McpError} If resulting path would be outside vault
  */
-export function safeJoinPath(vaultPath: string, ...segments: string[]): string {
+export async function safeJoinPath(vaultPath: string, ...segments: string[]): Promise<string> {
   const joined = path.join(vaultPath, ...segments);
   const resolved = normalizePath(joined);
 
-  validateVaultPath(vaultPath, resolved);
+  await validateVaultPath(vaultPath, resolved);
 
   return resolved;
 }
 
 /**
- * Sanitizes a vault name to be filesystem-safe
+ * Sanitizes a vault name to be filesystem-safe while preserving characters like Japanese
  * @param name - The raw vault name
  * @returns The sanitized vault name
  */
 export function sanitizeVaultName(name: string): string {
   return name
     .toLowerCase()
-    // Replace spaces and special characters with hyphens
-    .replace(/[^a-z0-9]+/g, "-")
+    // Replace problematic filesystem characters and separators with hyphens
+    // We allow a broader range of characters but exclude those restricted by most OSs
+    .replace(/[<>:"/\\|?*\x00-\x1F\x7F]/g, "-")
+    // Replace multiple hyphens with a single one
+    .replace(/-+/g, "-")
     // Remove leading/trailing hyphens
     .replace(/^-+|-+$/g, "") ||
     // Ensure name isn't empty

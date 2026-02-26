@@ -535,7 +535,7 @@ Examples:
     // Start the server without logging to stdout
     await server.start();
   } catch (error) {
-    console.log(error instanceof Error ? error.message : String(error));
+    console.error(error instanceof Error ? error.message : String(error));
     // Format error for MCP protocol
     const mcpError = error instanceof McpError ? error : new McpError(
       ErrorCode.InternalError,

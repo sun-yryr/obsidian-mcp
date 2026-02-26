@@ -52,7 +52,7 @@ export class ConnectionMonitor {
   private readonly gracePeriod: number;
   private initialized: boolean = false;
 
-  constructor(timeout: number = 60000, gracePeriod: number = 30000) { // 60s timeout, 30s grace period
+  constructor(timeout: number = 3600000, gracePeriod: number = 300000) { // 1h timeout, 5m grace period
     this.timeout = timeout;
     this.gracePeriod = gracePeriod;
   }
